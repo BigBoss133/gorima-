@@ -8,19 +8,27 @@ load_dotenv()
 def clear_screen():
     os.system('clear')
 
+def check_ollama():
+    try:
+        import requests
+        requests.get('http://localhost:11434', timeout=2)
+        return True
+    except Exception:
+        return False
+
 def check_api_keys():
     groq = os.getenv('GROQ_API_KEY', '').strip()
-    openrouter = os.getenv('OPENROUTER_API_KEY', '').strip()
-    if not groq and not openrouter:
-        print('\x1b[91m❌ ERRORE: Nessuna API key configurata.\x1b[0m')
-        print('Imposta GROQ_API_KEY o OPENROUTER_API_KEY nel file .env')
-        print('Copia .env.example in .env e inserisci le tue chiavi.')
-        return False
+    ollama_up = check_ollama()
     providers = []
     if groq:
         providers.append('Groq')
-    if openrouter:
-        providers.append('OpenRouter')
+    if ollama_up:
+        providers.append('Ollama (locale)')
+    if not providers:
+        print('\x1b[91m❌ ERRORE: Nessun provider LLM disponibile.\x1b[0m')
+        print('Imposta GROQ_API_KEY nel file .env')
+        print('Oppure avvia Ollama in locale per il fallback di emergenza.')
+        return False
     print(f'\x1b[92m✅ Provider attivi: {", ".join(providers)}\x1b[0m')
     return True
 
@@ -36,10 +44,10 @@ def check_skills():
 
 def show_status():
     groq = os.getenv('GROQ_API_KEY', '').strip()
-    openrouter = os.getenv('OPENROUTER_API_KEY', '').strip()
+    ollama_up = check_ollama()
     print('\n\x1b[96m📊 STATO SISTEMA\x1b[0m')
     print(f'  Groq:        {"\x1b[92m✅ Configurato\x1b[0m" if groq else "\x1b[91m❌ Non configurato\x1b[0m"}')
-    print(f'  OpenRouter:  {"\x1b[92m✅ Configurato\x1b[0m" if openrouter else "\x1b[91m❌ Non configurato\x1b[0m"}')
+    print(f'  Ollama:      {"\x1b[92m✅ In esecuzione\x1b[0m" if ollama_up else "\x1b[91m❌ Non in esecuzione\x1b[0m"}')
     base_dir = os.path.dirname(os.path.abspath(__file__))
     skills_dir = os.path.join(base_dir, 'data', 'skills')
     skills = glob.glob(os.path.join(skills_dir, '*.md'))

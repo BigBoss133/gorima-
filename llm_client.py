@@ -1,28 +1,59 @@
 import os
+import requests
 from dotenv import load_dotenv
 from openai import OpenAI
 
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 GROQ_MODEL = "llama-3.3-70b-versatile"
-OPENROUTER_MODEL = "deepseek/deepseek-v4-flash:free"
+OLLAMA_MODEL = "llama3.1:8b"
+OLLAMA_URL = "http://localhost:11434"
 
 TIMEOUT_SECONDS = 15
+OLLAMA_TIMEOUT = 60
 
 FALLBACK_ERROR_MESSAGE = (
     "Mi dispiace, al momento non riesco a elaborare la richiesta. "
-    "Entrambi i servizi LLM (Groq e OpenRouter) non sono disponibili. "
+    "Groq e il modello locale non sono disponibili. "
     "Riprova tra qualche istante o contatta il supporto tecnico."
 )
 
 
-def query_llm(system_prompt: str, user_query: str) -> str:
-    """Query an LLM via Groq (primary) or OpenRouter (fallback)."""
+def query_ollama(system_prompt: str, user_query: str) -> str | None:
+    """Query local Ollama instance as emergency fallback."""
+    try:
+        response = requests.post(
+            f"{OLLAMA_URL}/api/chat",
+            json={
+                "model": OLLAMA_MODEL,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_query},
+                ],
+                "stream": False,
+                "options": {"temperature": 0.7, "num_predict": 512},
+            },
+            timeout=OLLAMA_TIMEOUT,
+        )
+        if response.status_code == 200:
+            data = response.json()
+            content = data.get("message", {}).get("content", "").strip()
+            if content:
+                return content
+        else:
+            print(f"[LLM Client] Ollama returned status {response.status_code}")
+    except requests.exceptions.ConnectionError:
+        print("[LLM Client] Ollama not running or not reachable at localhost:11434")
+    except Exception as e:
+        print(f"[LLM Client] Ollama error: {e}")
+    return None
 
-    # Try Groq first
+
+def query_llm(system_prompt: str, user_query: str) -> str:
+    """Query an LLM via Groq → Ollama (local fallback)."""
+
     if GROQ_API_KEY:
         try:
             client = OpenAI(
@@ -45,27 +76,9 @@ def query_llm(system_prompt: str, user_query: str) -> str:
     else:
         print("[LLM Client] GROQ_API_KEY not set, skipping Groq.")
 
-    # Fallback to OpenRouter
-    if OPENROUTER_API_KEY:
-        try:
-            client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=OPENROUTER_API_KEY,
-                timeout=TIMEOUT_SECONDS,
-            )
-            response = client.chat.completions.create(
-                model=OPENROUTER_MODEL,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_query},
-                ],
-            )
-            content = response.choices[0].message.content
-            if content:
-                return content.strip()
-        except Exception as e:
-            print(f"[LLM Client] OpenRouter API error: {e}")
-    else:
-        print("[LLM Client] OPENROUTER_API_KEY not set, skipping OpenRouter.")
+    print("[LLM Client] Falling back to local Ollama...")
+    result = query_ollama(system_prompt, user_query)
+    if result:
+        return result
 
     return FALLBACK_ERROR_MESSAGE
