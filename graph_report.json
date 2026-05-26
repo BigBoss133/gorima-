@@ -1,0 +1,164 @@
+{
+  "nodes": [
+    {
+      "id": "homepage_md",
+      "label": "homepage.md",
+      "file_type": "document",
+      "source_file": "homepage.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "web_source_homepage_il_gruppo",
+      "label": "Il gruppo",
+      "file_type": "document",
+      "source_file": "homepage.md",
+      "source_location": "L23"
+    },
+    {
+      "id": "web_source_homepage_nata_come_societ\u00e0_operante_nell_ambito_della_commercializzazione_di_prodotti_petroliferi_e_materiali_per_l_edilizia_gorima_si_\u00e8_sempre_posta_l_obiettivo_di_offrire_ai_propri_clienti_la_migliore_gamma_di_servizi",
+      "label": "Nata come societa\u0300 operante nell\u2019ambito della commercializzazione di prodotti petroliferi e materiali per l\u2019edilizia, Gorima si e\u0300 sempre posta l\u2019obiettivo di offrire ai propri clienti la migliore gamma di servizi.",
+      "file_type": "document",
+      "source_file": "homepage.md",
+      "source_location": "L25"
+    },
+    {
+      "id": "web_source_homepage_in_cui_la_nostra_squadra_rappresenta_un_punto_di_riferimento_nel_settore_delle_pavimentazioni_stradali_fornendo_le_proprie_competenze_e_assistenza_alle_imprese_e_al_territorio",
+      "label": "In cui la nostra squadra rappresenta un punto di riferimento nel settore delle pavimentazioni stradali, fornendo le proprie competenze e assistenza alle imprese e al territorio.",
+      "file_type": "document",
+      "source_file": "homepage.md",
+      "source_location": "L37"
+    },
+    {
+      "id": "web_source_homepage_stabilimenti",
+      "label": "Stabilimenti",
+      "file_type": "document",
+      "source_file": "homepage.md",
+      "source_location": "L43"
+    },
+    {
+      "id": "web_source_homepage_gli_stabilimenti_gorima_sono_il_cuore_pulsante_dell_azienda_in_cui_innovazione_e_ricerca_si_fondono_per_offrire_i_migliori_prodotti_ad_imprese_e_pubblica_amministrazione",
+      "label": "Gli stabilimenti Gorima sono il cuore pulsante dell\u2019azienda in cui innovazione e ricerca si fondono per offrire i migliori prodotti ad imprese e pubblica amministrazione.",
+      "file_type": "document",
+      "source_file": "homepage.md",
+      "source_location": "L45"
+    },
+    {
+      "id": "web_source_homepage_news",
+      "label": "News",
+      "file_type": "document",
+      "source_file": "homepage.md",
+      "source_location": "L121"
+    },
+    {
+      "id": "web_source_homepage_implementazione_di_un_impianto_fotovoltaico_da_200_kwh_per_una_produzione_energetica_sostenibile_presso_lo_stabilimento_di_catanzaro_https_www_gorima_it_impianto_fotovoltaico_catanzaro",
+      "label": "[Implementazione di un Impianto Fotovoltaico da 200 kWh per una Produzione Energetica Sostenibile presso lo stabilimento di Catanzaro](https://www.gorima.it/impianto-fotovoltaico-catanzaro/)",
+      "file_type": "document",
+      "source_file": "homepage.md",
+      "source_location": "L125"
+    },
+    {
+      "id": "web_source_homepage_spanditura_di_emulsione_bituminosa_un_nuovo_servizio_chiavi_in_mano_per_i_vostri_cantieri_https_www_gorima_it_spanditura_di_emulsione_bituminosa",
+      "label": "[Spanditura di Emulsione Bituminosa: un nuovo servizio chiavi in mano per i vostri cantieri](https://www.gorima.it/spanditura-di-emulsione-bituminosa/)",
+      "file_type": "document",
+      "source_file": "homepage.md",
+      "source_location": "L129"
+    },
+    {
+      "id": "www_anas_it_md",
+      "label": "www.anas.it_.md",
+      "file_type": "document",
+      "source_file": "www.anas.it_.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "www_gorima_it_md",
+      "label": "www.gorima.it_.md",
+      "file_type": "document",
+      "source_file": "www.gorima.it_.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "www_siteb_it_md",
+      "label": "www.siteb.it_.md",
+      "file_type": "document",
+      "source_file": "www.siteb.it_.md",
+      "source_location": "L1"
+    }
+  ],
+  "edges": [
+    {
+      "source": "homepage_md",
+      "target": "web_source_homepage_il_gruppo",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "homepage.md",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "web_source_homepage_il_gruppo",
+      "target": "web_source_homepage_nata_come_societ\u00e0_operante_nell_ambito_della_commercializzazione_di_prodotti_petroliferi_e_materiali_per_l_edilizia_gorima_si_\u00e8_sempre_posta_l_obiettivo_di_offrire_ai_propri_clienti_la_migliore_gamma_di_servizi",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "homepage.md",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "web_source_homepage_il_gruppo",
+      "target": "web_source_homepage_in_cui_la_nostra_squadra_rappresenta_un_punto_di_riferimento_nel_settore_delle_pavimentazioni_stradali_fornendo_le_proprie_competenze_e_assistenza_alle_imprese_e_al_territorio",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "homepage.md",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "homepage_md",
+      "target": "web_source_homepage_stabilimenti",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "homepage.md",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "web_source_homepage_stabilimenti",
+      "target": "web_source_homepage_gli_stabilimenti_gorima_sono_il_cuore_pulsante_dell_azienda_in_cui_innovazione_e_ricerca_si_fondono_per_offrire_i_migliori_prodotti_ad_imprese_e_pubblica_amministrazione",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "homepage.md",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "homepage_md",
+      "target": "web_source_homepage_news",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "homepage.md",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "homepage_md",
+      "target": "web_source_homepage_implementazione_di_un_impianto_fotovoltaico_da_200_kwh_per_una_produzione_energetica_sostenibile_presso_lo_stabilimento_di_catanzaro_https_www_gorima_it_impianto_fotovoltaico_catanzaro",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "homepage.md",
+      "source_location": "L125",
+      "weight": 1.0
+    },
+    {
+      "source": "homepage_md",
+      "target": "web_source_homepage_spanditura_di_emulsione_bituminosa_un_nuovo_servizio_chiavi_in_mano_per_i_vostri_cantieri_https_www_gorima_it_spanditura_di_emulsione_bituminosa",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "homepage.md",
+      "source_location": "L129",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,0 +1,5 @@
+Il presidente della Regione ha partecipato alle cerimonie organizzate in occasione della Giornata della legalità di quest'anno al Museo del Presente e alla caserma Lungaro di Palermo
+La presentazione con tecnici ed esperti in conferenza stampa a Palazzo d’Orléans. Schifani: «Lavori dalla primavera 2027 e inaugurazione entro il 2028»
+Consultazione pubblica al fine di migliorare la sezione “Amministrazione Trasparente” rendendo più agevole la lettura, ricerca e accessibilità dei dati pubblicati.
+Osservazioni e proposte da inviare entro il 30 maggio 2026 a: trasparenzasemplificazione.fp@regione.sicilia.it
+Pubblicato l'avviso per l'acquisizione delle manifestazioni d'interesse per la nomina del Presidente e dei componenti del Comitato Unico di Garanzia per le pari opportunità, la valorizzazione del benessere di chi lavora e contro le discriminazioni della Regione Sicili ana.

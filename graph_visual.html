@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gorima_engine — Complete Call Flow &amp; Architecture Documentation</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg: #0f172a; --surface: #1e293b; --border: #334155;
+  --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
+  --warn: #fbbf24; --err: #f87171; --ok: #34d399;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 2.4rem; margin-bottom: 8px; background: linear-gradient(135deg, var(--accent), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+h2 { font-size: 1.7rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+h3 { font-size: 1.25rem; margin: 32px 0 12px; color: var(--accent); }
+h4 { font-size: 1.05rem; margin: 20px 0 8px; color: var(--warn); }
+p { margin: 8px 0; color: var(--muted); }
+.subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 32px; }
+.mermaid { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; overflow-x: auto; position: relative; }
+.mermaid.is-enhanced { padding: 0; overflow: hidden; min-height: 260px; }
+.mermaid-viewport { padding: 54px 24px 24px; overflow: hidden; cursor: grab; touch-action: none; min-height: 260px; }
+.mermaid-viewport.is-dragging { cursor: grabbing; }
+.mermaid-viewport svg { max-width: none !important; height: auto; transform-origin: 0 0; transition: transform 120ms ease; }
+.mermaid-toolbar { position: absolute; top: 10px; right: 10px; z-index: 3; display: flex; align-items: center; gap: 6px; padding: 6px; background: rgba(15,23,42,0.92); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.28); }
+.mermaid-toolbar button, .mermaid-toolbar .zoom-level { height: 28px; min-width: 32px; border: 1px solid var(--border); border-radius: 6px; background: #1e293b; color: var(--text); font: 600 0.78rem system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; }
+.mermaid-toolbar button { cursor: pointer; }
+.mermaid-toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+.mermaid-toolbar .zoom-level { min-width: 52px; color: var(--muted); background: transparent; }
+.call-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92rem; }
+.call-table th { background: #1a2744; color: var(--accent); text-align: left; padding: 10px 14px; border: 1px solid var(--border); }
+.call-table td { padding: 8px 14px; border: 1px solid var(--border); vertical-align: top; }
+.call-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
+.tag-async { background: #7c3aed33; color: #a78bfa; }
+.tag-class { background: #05966933; color: var(--ok); }
+.tag-func { background: #2563eb33; color: var(--accent); }
+.tag-cmd { background: #d9770633; color: var(--warn); }
+.tag-endpoint { background: #dc262633; color: var(--err); }
+.tag-hook { background: #db277733; color: #f472b6; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 16px 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 16px 0; }
+.arrow-chain { font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--accent); padding: 10px; background: rgba(56,189,248,0.06); border-radius: 6px; }
+code { font-family: 'Fira Code', 'Cascadia Code', monospace; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+ul, ol { margin: 8px 0 8px 24px; color: var(--muted); }
+li { margin: 4px 0; }
+a { color: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.nav { position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.9rem; }
+.nav a { text-decoration: none; }
+.nav a:hover { text-decoration: underline; }
+@media (max-width: 768px) { .container { padding: 16px; } h1 { font-size: 1.8rem; } }
+
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>gorima_engine — Complete Call Flow &amp; Architecture Documentation</h1>
+<p class="subtitle">Generated from graphify knowledge graph: 12 nodes, 8 edges, 1 communities. Commit: unknown</p>
+
+<div class="nav">
+    <a href="#overview">Architecture Overview</a>
+    <a href="#homepagemd-per-wwwgorimait">Homepagemd Per Wwwgorimait</a>
+</div>
+
+<!-- ====== Architecture Overview ====== -->
+<h2 id="overview">1. Architecture Overview</h2>
+
+<div class="mermaid">
+
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    HOMEPAGEMD_PER_WWWGORIMAIT_A9D74CCF("Homepagemd Per Wwwgorimait<br/><small>12 nodes</small>")
+    class HOMEPAGEMD_PER_WWWGORIMAIT_A9D74CCF module;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h4>Architecture Layers</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
+      <tr><td>Homepagemd Per Wwwgorimait</td><td>12</td><td><code>unknown</code></td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Core Flow</h4>
+    <div class="arrow-chain">Homepagemd Per Wwwgorimait</div>
+  </div>
+</div>
+<hr>
+<!-- ====== 2. Homepagemd Per Wwwgorimait ====== -->
+<h2 id="homepagemd-per-wwwgorimait">2. Homepagemd Per Wwwgorimait</h2>
+<p>Homepagemd Per Wwwgorimait groups implementation around homepagemd, per, wwwgorimait, prodotti, mostly in homepage.md, www.anas.it_.md, www.gorima.it_.md. This section covers 12 nodes and 8 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Homepagemd Per Wwwgorimait (12 nodes, 8 edges)
+    subgraph homepagemd_per_wwwgorimait_homepage_md_c39e9edd["homepage.md"]
+        homepage_md_b39f9e74("homepage.md")
+        web_source_homepage_il_gruppo_2b972106("Il gruppo<br/><small>homepage.md</small>")
+        web_source_homepage_stabilimenti_f4ab131d("Stabilimenti<br/><small>homepage.md</small>")
+        web_source_homepage_nata_come_societ_operante_ne_b8e8c104("Nata come società operante nell’ambito...<br/><small>homepage.md</small>")
+        web_source_homepage_in_cui_la_nostra_squadra_rap_0afde6c8("In cui la nostra squadra rappresenta un...<br/><small>homepage.md</small>")
+        web_source_homepage_gli_stabilimenti_gorima_sono_a75a5957("Gli stabilimenti Gorima sono il cuore p...<br/><small>homepage.md</small>")
+        web_source_homepage_news_5ca0d5cd("News<br/><small>homepage.md</small>")
+        web_source_homepage_implementazione_di_un_impian_22a0bf88("[Implementazione di un Impianto Fotovol...<br/><small>homepage.md</small>")
+        web_source_homepage_spanditura_di_emulsione_bitu_3c3efa72("[Spanditura di Emulsione Bituminosa: un...<br/><small>homepage.md</small>")
+    end
+    www_anas_it_md_77ee1cc0("www.anas.it_.md")
+    www_gorima_it_md_0aa5e625("www.gorima.it_.md")
+    www_siteb_it_md_a413467a("www.siteb.it_.md")
+    homepage_md_b39f9e74 -->|contains| web_source_homepage_il_gruppo_2b972106
+    web_source_homepage_il_gruppo_2b972106 -->|contains| web_source_homepage_nata_come_societ_operante_ne_b8e8c104
+    web_source_homepage_il_gruppo_2b972106 -->|contains| web_source_homepage_in_cui_la_nostra_squadra_rap_0afde6c8
+    homepage_md_b39f9e74 -->|contains| web_source_homepage_stabilimenti_f4ab131d
+    web_source_homepage_stabilimenti_f4ab131d -->|contains| web_source_homepage_gli_stabilimenti_gorima_sono_a75a5957
+    homepage_md_b39f9e74 -->|contains| web_source_homepage_news_5ca0d5cd
+    homepage_md_b39f9e74 -->|contains| web_source_homepage_implementazione_di_un_impian_22a0bf88
+    homepage_md_b39f9e74 -->|contains| web_source_homepage_spanditura_di_emulsione_bitu_3c3efa72
+    class homepage_md_b39f9e74 concept;
+    class web_source_homepage_il_gruppo_2b972106 concept;
+    class web_source_homepage_stabilimenti_f4ab131d concept;
+    class web_source_homepage_nata_come_societ_operante_ne_b8e8c104 concept;
+    class web_source_homepage_in_cui_la_nostra_squadra_rap_0afde6c8 concept;
+    class web_source_homepage_gli_stabilimenti_gorima_sono_a75a5957 concept;
+    class web_source_homepage_news_5ca0d5cd concept;
+    class web_source_homepage_implementazione_di_un_impian_22a0bf88 concept;
+    class web_source_homepage_spanditura_di_emulsione_bitu_3c3efa72 concept;
+    class www_anas_it_md_77ee1cc0 concept;
+    class www_gorima_it_md_0aa5e625 concept;
+    class www_siteb_it_md_a413467a concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>homepage.md</code><br><small style="color:var(--muted)">homepage.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing homepage.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Il gruppo</code><br><small style="color:var(--muted)">homepage.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Il gruppo.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Nata come società operante nell’ambito della commercializzazione di prodotti petroliferi e materiali per l’edilizia, Gorima si è sempre posta l’obiettivo di offrire ai propri clienti la migliore gamma di servizi.</code><br><small style="color:var(--muted)">homepage.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Nata come società operante nell’ambito della commercializzazione di prodotti petroliferi e materiali per l’edilizia, Gorima si è sempre posta l’obiettivo di offrire ai propri clienti la migliore gamma di servizi..</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>In cui la nostra squadra rappresenta un punto di riferimento nel settore delle pavimentazioni stradali, fornendo le proprie competenze e assistenza alle imprese e al territorio.</code><br><small style="color:var(--muted)">homepage.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing In cui la nostra squadra rappresenta un punto di riferimento nel settore delle pavimentazioni stradali, fornendo le proprie competenze e assistenza alle imprese e al territorio..</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Stabilimenti</code><br><small style="color:var(--muted)">homepage.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Stabilimenti.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>Gli stabilimenti Gorima sono il cuore pulsante dell’azienda in cui innovazione e ricerca si fondono per offrire i migliori prodotti ad imprese e pubblica amministrazione.</code><br><small style="color:var(--muted)">homepage.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Gli stabilimenti Gorima sono il cuore pulsante dell’azienda in cui innovazione e ricerca si fondono per offrire i migliori prodotti ad imprese e pubblica amministrazione..</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>News</code><br><small style="color:var(--muted)">homepage.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing News.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>[Implementazione di un Impianto Fotovoltaico da 200 kWh per una Produzione Energetica Sostenibile presso lo stabilimento di Catanzaro](https://www.gorima.it/impianto-fotovoltaico-catanzaro/)</code><br><small style="color:var(--muted)">homepage.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing [Implementazione di un Impianto Fotovoltaico da 200 kWh per una Produzione Energetica Sostenibile presso lo stabilimento di Catanzaro](https://www.gorima.it/impianto-fotovoltaico-catanzaro/).</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>[Spanditura di Emulsione Bituminosa: un nuovo servizio chiavi in mano per i vostri cantieri](https://www.gorima.it/spanditura-di-emulsione-bituminosa/)</code><br><small style="color:var(--muted)">homepage.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing [Spanditura di Emulsione Bituminosa: un nuovo servizio chiavi in mano per i vostri cantieri](https://www.gorima.it/spanditura-di-emulsione-bituminosa/).</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>www.anas.it_.md</code><br><small style="color:var(--muted)">www.anas.it_.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing www.anas.it_.md.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>www.gorima.it_.md</code><br><small style="color:var(--muted)">www.gorima.it_.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing www.gorima.it_.md.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>www.siteb.it_.md</code><br><small style="color:var(--muted)">www.siteb.it_.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing www.siteb.it_.md.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>homepage.md</code></td><td>9 nodes</td></tr>
+<tr><td><code>www.anas.it_.md</code></td><td>1 nodes</td></tr>
+<tr><td><code>www.gorima.it_.md</code></td><td>1 nodes</td></tr>
+<tr><td><code>www.siteb.it_.md</code></td><td>1 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x8. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<h2 id="stats">Project Statistics</h2>
+
+<div class="grid">
+  <div class="card">
+    <h4>Graph</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><td>Nodes</td><td>12</td></tr>
+      <tr><td>Edges</td><td>8</td></tr>
+      <tr><td>Hyperedges</td><td>0</td></tr>
+      <tr><td>Communities</td><td>1</td></tr>
+      <tr><td>Documented Sections</td><td>1</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Edge Confidence</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><td>EXTRACTED</td><td>8</td></tr>
+      <tr><td>INFERRED</td><td>0</td></tr>
+      <tr><td>AMBIGUOUS</td><td>0</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
+  <p>gorima_engine — Architecture Documentation</p>
+  <p>Generated: 2026-05-26 09:46 UTC · graphify callflow-html</p>
+</div>
+
+</div><!-- .container -->
+
+<script>
+(function () {
+  const mermaidConfig = {
+    startOnLoad: false,
+    theme: 'dark',
+    securityLevel: 'loose',
+    flowchart: { htmlLabels: true, useMaxWidth: true },
+    themeVariables: {
+      primaryColor: '#1e293b',
+      primaryTextColor: '#e2e8f0',
+      primaryBorderColor: '#38bdf8',
+      secondaryColor: '#0f172a',
+      tertiaryColor: '#334155',
+      lineColor: '#64748b',
+      textColor: '#e2e8f0',
+    }
+  };
+
+  mermaid.initialize(mermaidConfig);
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function enhanceMermaidDiagrams() {
+    document.querySelectorAll('.mermaid').forEach((container) => {
+      if (container.dataset.zoomReady === 'true') return;
+      const svg = container.querySelector('svg');
+      if (!svg) return;
+
+      container.dataset.zoomReady = 'true';
+      container.classList.add('is-enhanced');
+
+      const viewport = document.createElement('div');
+      viewport.className = 'mermaid-viewport';
+      svg.parentNode.insertBefore(viewport, svg);
+      viewport.appendChild(svg);
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'mermaid-toolbar';
+      toolbar.innerHTML = [
+        '<button type="button" data-action="zoom-out" title="Zoom out">-</button>',
+        '<span class="zoom-level" data-role="level">100%</span>',
+        '<button type="button" data-action="zoom-in" title="Zoom in">+</button>',
+        '<button type="button" data-action="fit" title="Fit width">Fit</button>',
+        '<button type="button" data-action="reset" title="Reset view">Reset</button>'
+      ].join('');
+      container.insertBefore(toolbar, viewport);
+
+      const state = { scale: 1, x: 0, y: 0, dragging: false, startX: 0, startY: 0, originX: 0, originY: 0 };
+      const level = toolbar.querySelector('[data-role="level"]');
+
+      function applyTransform() {
+        svg.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`;
+        level.textContent = `${Math.round(state.scale * 100)}%`;
+      }
+
+      function zoomBy(delta) {
+        state.scale = clamp(state.scale + delta, 0.25, 3);
+        applyTransform();
+      }
+
+      function reset() {
+        state.scale = 1;
+        state.x = 0;
+        state.y = 0;
+        applyTransform();
+      }
+
+      function fitWidth() {
+        const rawWidth = svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width
+          ? svg.viewBox.baseVal.width
+          : svg.getBoundingClientRect().width / state.scale;
+        if (!rawWidth) {
+          reset();
+          return;
+        }
+        state.scale = clamp((viewport.clientWidth - 48) / rawWidth, 0.25, 1.4);
+        state.x = 0;
+        state.y = 0;
+        applyTransform();
+      }
+
+      toolbar.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+        const action = button.dataset.action;
+        if (action === 'zoom-in') zoomBy(0.15);
+        if (action === 'zoom-out') zoomBy(-0.15);
+        if (action === 'fit') fitWidth();
+        if (action === 'reset') reset();
+      });
+
+      viewport.addEventListener('wheel', (event) => {
+        if (!event.ctrlKey && !event.metaKey) return;
+        event.preventDefault();
+        zoomBy(event.deltaY < 0 ? 0.1 : -0.1);
+      }, { passive: false });
+
+      viewport.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        state.dragging = true;
+        state.startX = event.clientX;
+        state.startY = event.clientY;
+        state.originX = state.x;
+        state.originY = state.y;
+        viewport.classList.add('is-dragging');
+        viewport.setPointerCapture(event.pointerId);
+      });
+
+      viewport.addEventListener('pointermove', (event) => {
+        if (!state.dragging) return;
+        state.x = state.originX + event.clientX - state.startX;
+        state.y = state.originY + event.clientY - state.startY;
+        applyTransform();
+      });
+
+      function endDrag(event) {
+        if (!state.dragging) return;
+        state.dragging = false;
+        viewport.classList.remove('is-dragging');
+        if (viewport.hasPointerCapture(event.pointerId)) {
+          viewport.releasePointerCapture(event.pointerId);
+        }
+      }
+
+      viewport.addEventListener('pointerup', endDrag);
+      viewport.addEventListener('pointercancel', endDrag);
+      applyTransform();
+    });
+  }
+
+  function renderMermaid() {
+    const result = mermaid.run
+      ? mermaid.run({ querySelector: '.mermaid' })
+      : Promise.resolve();
+    Promise.resolve(result)
+      .then(enhanceMermaidDiagrams)
+      .catch((error) => {
+        console.error('Mermaid render failed:', error);
+        enhanceMermaidDiagrams();
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderMermaid);
+  } else {
+    renderMermaid();
+  }
+})();
+</script>
+
+</body>
+</html>
