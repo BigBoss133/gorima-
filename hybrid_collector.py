@@ -2,9 +2,12 @@ import os
 import json
 import requests
 import trafilatura
+from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
-API_KEY_FIRECRAWL = 'fc-9aa6be66caa24c4da2558599e4d2459b'
+load_dotenv()
+
+API_KEY_FIRECRAWL = os.getenv('FIRECRAWL_API_KEY', '')
 DATA_DIR = '/home/mike/gorima_engine/data/web_source'
 os.makedirs(DATA_DIR, exist_ok=True)
 

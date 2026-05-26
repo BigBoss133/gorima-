@@ -33,7 +33,7 @@ def scrape_source():
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         
-        for source, cfg in TARGETS.items():
+        for source, cfg in TARGET_SOURCES.items():
             try:
                 print(f'Monitoring {source}...')
                 if cfg['method'] == 'playwright':
@@ -57,6 +57,4 @@ def scrape_source():
         browser.close()
 
 if __name__ == '__main__':
-    # Simplified mapping for the script
-    TARGETS = TARGET_SOURCES 
     scrape_source()

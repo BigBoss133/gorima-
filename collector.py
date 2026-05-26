@@ -1,9 +1,12 @@
+import os
 import requests
 import json
-import os
 from urllib.parse import urljoin, urlparse
+from dotenv import load_dotenv
 
-API_KEY = 'fc-9aa6be66caa24c4da2558599e4d2459b'
+load_dotenv()
+
+API_KEY = os.getenv('FIRECRAWL_API_KEY', '')
 BASE_URL_API = 'https://api.firecrawl.dev/v1/crawl'
 START_URL = 'https://www.gorima.it/'
 OUTPUT_DIR = '/home/mike/gorima_engine/data/web_source'

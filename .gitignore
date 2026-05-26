@@ -1,0 +1,16 @@
+# Environment
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+
+# Data (scraped content, not committed)
+data/web_source/
+data/bandi/
+
+# IDE
+.vscode/
+.idea/
