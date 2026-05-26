@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gorima Engine</title>
+<style>
+/* Reset e base */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#1a1a1a}
+
+/* Layout principale */
+.app{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* Header */
+.header{position:sticky;top:0;z-index:100;background:#c00;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;box-shadow:0 2px 4px rgba(0,0,0,.15)}
+.header-brand{font-size:1.2rem;font-weight:700;letter-spacing:.5px}
+.header-version{font-size:.875rem;opacity:.9}
+.header-menu{background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;padding:.25rem .5rem}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;left:0;width:260px;height:100%;background:#fff;border-right:1px solid #e0e0e0;transform:translateX(-100%);transition:transform .3s ease;z-index:200;display:flex;flex-direction:column;padding:1rem}
+.sidebar.active{transform:translateX(0)}
+.sidebar-title{font-size:1rem;font-weight:700;color:#c00;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid #c00}
+.sidebar-btn{width:100%;text-align:left;padding:.75rem 1rem;margin-bottom:.5rem;border:1px solid #e0e0e0;border-radius:6px;background:#f5f5f5;color:#1a1a1a;font-size:.875rem;cursor:pointer;transition:all .2s}
+.sidebar-btn:hover{background:#c00;color:#fff;border-color:#c00}
+.sidebar-close{position:absolute;top:.75rem;right:.75rem;background:none;border:none;font-size:1.25rem;cursor:pointer;color:#666;display:block}
+
+/* Overlay mobile */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:150;opacity:0;pointer-events:none;transition:opacity .3s}
+.overlay.active{opacity:1;pointer-events:auto}
+
+/* Main chat */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.chat{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem;background:#fff}
+
+/* Messaggi */
+.msg{max-width:85%;padding:.75rem 1rem;border-radius:8px;line-height:1.5;font-size:.9375rem;word-wrap:break-word}
+.msg-assistant{align-self:flex-start;background:#f5f5f5;border-left:4px solid #c00;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.msg-user{align-self:flex-end;background:#c00;color:#fff}
+.msg strong{color:#c00}
+.msg-user strong{color:#fff}
+
+/* Tabelle nei messaggi */
+.msg table{width:100%;border-collapse:collapse;margin:.5rem 0;font-size:.8125rem}
+.msg th,.msg td{border:1px solid #e0e0e0;padding:.4rem .5rem;text-align:left}
+.msg th{background:#c00;color:#fff}
+.msg tr:nth-child(even){background:#f9f9f9}
+
+/* Suggestion chips */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+.chip{padding:.4rem .75rem;border:1px solid #c00;border-radius:16px;background:#fff;color:#c00;font-size:.8125rem;cursor:pointer;transition:all .2s}
+.chip:hover{background:#c00;color:#fff}
+
+/* Input area */
+.input-area{position:sticky;bottom:0;background:#fff;border-top:1px solid #e0e0e0;padding:.75rem 1rem;display:flex;gap:.5rem;align-items:center;z-index:50}
+.input-field{flex:1;padding:.625rem .875rem;border:1px solid #e0e0e0;border-radius:6px;font-size:.9375rem;outline:none}
+.input-field:focus{border-color:#c00}
+.btn-send{background:#c00;color:#fff;border:none;padding:.625rem 1.25rem;border-radius:6px;font-size:.9375rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-send:hover{opacity:.9}
+.btn-mic{background:none;border:none;font-size:1.25rem;cursor:pointer;color:#666;padding:.25rem}
+
+/* Footer */
+.footer{text-align:center;padding:.5rem;font-size:.75rem;color:#666;border-top:1px solid #e0e0e0;background:#f5f5f5}
+
+/* Desktop */
+@media(min-width:768px){
+  .header-menu{display:none}
+  .sidebar-close{display:none}
+  .sidebar{position:relative;transform:translateX(0);height:auto;flex-shrink:0}
+  .main{flex-direction:row}
+  .chat{max-width:none}
+  .overlay{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="header-brand">GORIMA</div>
+    <div class="header-version">Engine v0.1</div>
+    <button class="header-menu" id="menuBtn" aria-label="Menu">&#9776;</button>
+  </header>
+
+  <div class="main">
+    <aside class="sidebar" id="sidebar">
+      <button class="sidebar-close" id="closeSidebar" aria-label="Chiudi">&times;</button>
+      <div class="sidebar-title">RICERCHE FREQUENTI</div>
+      <button class="sidebar-btn" data-action="cam-bandi">CAM e bandi Sicilia</button>
+      <button class="sidebar-btn" data-action="confronto">Confronto prodotti</button>
+      <button class="sidebar-btn" data-action="cliente-babbu">Cliente 'babbu'</button>
+      <button class="sidebar-btn" data-action="gare-catania">Gare aperte Catania</button>
+      <button class="sidebar-btn" data-action="prezzi">Prezzi bitume oggi</button>
+      <button class="sidebar-btn" data-action="stima">Stima materiali cantiere</button>
+    </aside>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div class="chat" id="chat"></div>
+
+      <div class="input-area">
+        <input type="text" class="input-field" id="inputField" placeholder="Scrivi la tua domanda..." autocomplete="off">
+        <button class="btn-mic" id="micBtn" aria-label="Microfono">&#127908;</button>
+        <button class="btn-send" id="sendBtn">Invia</button>
+      </div>
+
+      <footer class="footer">&copy; 2026 Gorima Engine &ndash; Michele</footer>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Stato applicazione */
+const state = {
+  estimator: null, // { step: 1-6, data: {} }
+  firstLoad: true
+};
+
+const chat = document.getElementById('chat');
+const inputField = document.getElementById('inputField');
+const sendBtn = document.getElementById('sendBtn');
+const menuBtn = document.getElementById('menuBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const closeSidebar = document.getElementById('closeSidebar');
+
+/* Risposte predefinite */
+const responses = {
+  'cam-bandi': `📋 <strong>BANDI CAM SICILIA – Aggiornamento 2026</strong><br><br>
+<strong>Lotto 1:</strong> SS114 Catania-Siracusa &ndash; €2.3M<br>
+<strong>Lotto 2:</strong> A19 Palermo-Catania &ndash; €5.1M<br>
+<strong>Lotto 3:</strong> Messina Via Garibaldi &ndash; €1.8M<br><br>
+🌱 <strong>Requisito CAM:</strong> D.M. 5/8/2024 imposta criteri ambientali minimi. Per i conglomerati bituminosi: uso di bitume modificato a basso impatto (GREENFLEX, WARM), contenuto riciclato &ge;30%, emissioni di CO2 certificate.<br><br>
+⭐ <strong>Bonus punti:</strong> GREENFLEX (+8 punti), WARM (+6 punti), RAP &gt;50% (+5 punti).`,
+
+  'gare-catania': `📍 <strong>GARE APERTE – Catania e provincia</strong><br><br>
+<strong>1. ANAS &ndash; Riqualificazione Via Etnea</strong><br>
+Valore: €890.000 &ndash; Scadenza: 15/06/2026<br><br>
+<strong>2. Comune Catania &ndash; Manutenzione strade Via Plebisciti</strong><br>
+Valore: €450.000 &ndash; Scadenza: 30/06/2026<br><br>
+💡 <strong>Consiglio:</strong> Entrambe richiedono certificazione CAM. Gorima ha vantaggio competitivo con GREENFLEX e WARM già testati su strade siciliane.`,
+
+  'cliente-babbu': `🎯 <strong>La tecnica del "babbu sutta u lenzulu"</strong><br><br>
+Quando il cliente è difficile, sospettoso, o "babbu" (tardo), non forzare la vendita. L'approccio giusto:<br><br>
+1. <strong>Ascolta prima di parlare</strong> &ndash; capisci il suo vero problema<br>
+2. <strong>Diventa consulente, non venditore</strong> &ndash; offri soluzioni tecniche<br>
+3. <strong>Porta dati concreti</strong> &ndash; prove, test, certificazioni<br>
+4. <strong>Non parlare male della concorrenza</strong> &ndash; mostra i vantaggi Gorima<br>
+5. <strong>Pazienza</strong> &ndash; il "babbu" diventa cliente fedele se conquistato con rispetto<br><br>
+🧠 <strong>Ricorda:</strong> "U babbu chi ciancia, ciancia beni" &ndash; chi è lento a decidere, decide bene.`,
+
+  'confronto': `⚖️ <strong>CONFRONTO PRODOTTI GORIMA</strong>
+<table>
+<tr><th>Prodotto</th><th>Caratteristiche</th><th>Ideale per</th></tr>
+<tr><td>Bitume 50/70</td><td>Tradizionale, economico</td><td>Strade residenziali, basso traffico</td></tr>
+<tr><td>Hard 50/70</td><td>Modificato, maggiore durata</td><td>Strade provinciali, traffico medio</td></tr>
+<tr><td>Topflex SBS</td><td>Alto prestazioni, elastico</td><td>Autostrade, traffico pesante</td></tr>
+<tr><td>GREENFLEX</td><td>CAM compliant, eco</td><td>Gare pubbliche, bonus punti</td></tr>
+<tr><td>WARM</td><td>Bassa temperatura, sicuro</td><td>Aree sensibili, emissioni ridotte</td></tr>
+</table>
+💡 <strong>Consiglio:</strong> Per gare CAM usa GREENFLEX o WARM per massimizzare i punteggi.`,
+
+  'prezzi': `💰 <strong>PREZZI BITUME &ndash; Maggio 2026</strong><br><br>
+<strong>Range attuale:</strong> 650 &ndash; 800 €/ton<br><br>
+📈 <strong>Trend:</strong> +47% rispetto al 2025<br>
+⚡ <strong>Costo energia:</strong> 6-7 €/ton (incide sul prezzo finale)<br><br>
+🔴 <strong>Fattori di pressione:</strong><br>
+&bull; Crisi energetica globale<br>
+&bull; Rifinitura greggio ISAB/Sonatrach<br>
+&bull; Costi logistica marittima<br><br>
+💡 <strong>Vantaggio Gorima:</strong> Stoccaggio strategico a Catania e Palermo permette stabilizzazione prezzi per clienti storici.`
+};
+
+/* Chips suggeriti per ogni tipo di risposta */
+const chipMap = {
+  'cam-bandi': ['E i prezzi?', 'Confronto prodotti', 'Vantaggi GREENFLEX'],
+  'prezzi': ['Confronto prodotti', 'Stima cantiere', 'CAM e bandi'],
+  'concorrenza': ['Confronto prodotti', 'Vantaggi logistici', 'Prezzi bitume'],
+  'estimator': ['Nuova stima', 'Confronto prodotti', 'CAM e bandi'],
+  'prodotto': ['Stima cantiere', 'Prezzi bitume oggi', 'CAM e bandi'],
+  'babbu': ['Confronto prodotti', 'Prezzi bitume', 'CAM e bandi']
+};
+
+/* Logica keyword */
+function matchKeywords(query) {
+  const q = query.toLowerCase();
+  const camWords = ['cam','bandi','gara','banda','sicilia'];
+  const babbuWords = ['babbu','cliente','vendita','sconto','tratta'];
+  const concWords = ['concorrenza','adrige','sicilbitumi','competitor'];
+  const prezzoWords = ['prezzo','bitume oggi','costo','quanto costa'];
+  const prodWords = ['prodotto','confronto','confronta','tipi'];
+  const stimaWords = ['stima','cantiere','preventivo','materiali'];
+
+  if (camWords.some(w => q.includes(w))) return 'cam-bandi';
+  if (babbuWords.some(w => q.includes(w))) return 'cliente-babbu';
+  if (concWords.some(w => q.includes(w))) return 'concorrenza';
+  if (prezzoWords.some(w => q.includes(w))) return 'prezzi';
+  if (prodWords.some(w => q.includes(w))) return 'confronto';
+  if (stimaWords.some(w => q.includes(w))) return 'stima';
+  return null;
+}
+
+/* Risposta concorrenza */
+function getConcorrenzaResponse() {
+  return `🏢 <strong>Panorama competitivo &ndash; Bitumi in Sicilia</strong><br><br>
+<strong>Adige Bitumi</strong> &ndash; 58M€ fatturato, leader Nord Italia, presente a Messina<br>
+<strong>Sicilbitumi (Palermo)</strong> &ndash; competitor locale, prezzi aggressivi<br>
+<strong>ISAB / Sonatrach</strong> &ndash; fornitori greggio, influenza prezzo<br><br>
+🛡️ <strong>Vantaggi Gorima:</strong><br>
+&bull; Logistica capillare (Catania + Palermo)<br>
+&bull; Prodotti CAM-ready (GREENFLEX, WARM)<br>
+&bull; Assistenza tecnica sul cantiere<br>
+&bull; Flessibilità sui volumi`;
+}
+
+/* Aggiungi messaggio alla chat */
+function addMessage(text, isUser = false, chips = []) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + (isUser ? 'msg-user' : 'msg-assistant');
+  div.innerHTML = text;
+  chat.appendChild(div);
+
+  if (chips.length) {
+    const chipContainer = document.createElement('div');
+    chipContainer.className = 'chips';
+    chips.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.textContent = c;
+      btn.onclick = () => handleInput(c);
+      chipContainer.appendChild(btn);
+    });
+    chat.appendChild(chipContainer);
+  }
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* Gestione input */
+async function handleInput(raw) {
+  const text = raw.trim();
+  if (!text) return;
+
+  addMessage(text, true);
+  inputField.value = '';
+
+  /* Gestione annulla estimator (PRIMA del flusso stimatore) */
+  if (text.toLowerCase() === 'esci' || text.toLowerCase() === 'annulla') {
+    if (state.estimator) {
+      state.estimator = null;
+      addMessage('❌ Stima annullata. Come posso aiutarti?', false, chipMap['prodotto']);
+    }
+    return;
+  }
+
+  /* Gestione estimator */
+  if (state.estimator) {
+    handleEstimator(text);
+    return;
+  }
+
+  const match = matchKeywords(text);
+
+  if (match === 'stima') {
+    startEstimator();
+    return;
+  }
+
+  if (match && responses[match]) {
+    addMessage(responses[match], false, chipMap[match] || chipMap['prodotto']);
+    return;
+  }
+
+  if (match === 'concorrenza') {
+    addMessage(getConcorrenzaResponse(), false, chipMap['concorrenza']);
+    return;
+  }
+
+  /* Fallback LLM */
+  addMessage('🔄 Sto consultando il motore...', false);
+  const llmResponse = await queryLLM(text);
+  chat.lastChild.remove(); // rimuovi "sto consultando"
+
+  if (llmResponse) {
+    addMessage(llmResponse, false, chipMap['prodotto']);
+  } else {
+    addMessage('Il motore LLM non è disponibile. Prova con una delle ricerche frequenti nella sidebar.', false, chipMap['prodotto']);
+  }
+}
+
+/* Chiamata LLM */
+async function queryLLM(query) {
+  try {
+    const response = await fetch('http://localhost:8080/api/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: query })
+    });
+    const data = await response.json();
+    return data.response;
+  } catch (error) {
+    return null;
+  }
+}
+
+/* Estimator flow */
+function startEstimator() {
+  state.estimator = { step: 1, data: {} };
+  addMessage('📍 Dove si trova il cantiere? (es. Catania, Palermo, Messina)<br><br><em>Scrivi "esci" o "annulla" per interrompere.</em>', false);
+}
+
+function handleEstimator(text) {
+  const est = state.estimator;
+
+  if (est.step === 1) {
+    est.data.location = text;
+    est.step = 2;
+    addMessage('🛣️ Che tipo di strada? (residenziale / provinciale / autostrada)', false);
+  } else if (est.step === 2) {
+    est.data.roadType = text;
+    est.step = 3;
+    addMessage('🚗 Livello di traffico? (basso / medio / pesante)', false);
+  } else if (est.step === 3) {
+    est.data.traffic = text;
+    est.step = 4;
+    addMessage('⚙️ Tipo di intervento? (nuova costruzione / manutenzione tappeto d\'usura)', false);
+  } else if (est.step === 4) {
+    est.data.intervention = text;
+    est.step = 5;
+    addMessage('📏 Dimensioni: lunghezza in metri?', false);
+  } else if (est.step === 5) {
+    const len = parseFloat(text.replace(',', '.'));
+    if (isNaN(len) || len <= 0) {
+      addMessage('⚠️ Inserisci un numero valido maggiore di 0.', false);
+      return;
+    }
+    est.data.length = len;
+    est.step = 6;
+    addMessage('📏 Larghezza in metri?', false);
+  } else if (est.step === 6) {
+    const wid = parseFloat(text.replace(',', '.'));
+    if (isNaN(wid) || wid <= 0) {
+      addMessage('⚠️ Inserisci un numero valido maggiore di 0.', false);
+      return;
+    }
+    est.data.width = wid;
+    generateReport(est.data);
+    state.estimator = null;
+  }
+}
+
+/* Genera report estimator */
+function generateReport(d) {
+  const rt = d.roadType.toLowerCase();
+  const tr = d.traffic.toLowerCase();
+  const iv = d.intervention.toLowerCase();
+
+  let product, thickness, benefits;
+
+  if (rt.includes('residenziale') && tr.includes('basso')) {
+    product = 'Bitume tradizionale 50/70';
+    thickness = 3;
+    benefits = ['Ottimo rapporto qualità/prezzo', 'Facile applicazione su piccole superfici'];
+  } else if (rt.includes('provinciale') && tr.includes('medio')) {
+    product = 'Bitume modificato Hard 50/70';
+    thickness = 4;
+    benefits = ['Maggior resistenza alle sollecitazioni', 'Durata superiore su strade a traffico medio'];
+  } else if (rt.includes('autostrada') && tr.includes('pesante')) {
+    product = 'Topflex SBS modificato';
+    thickness = 5;
+    benefits = ['Massima resistenza al traffico pesante', 'Elevata elasticità e recupero deformazioni'];
+  } else if (iv.includes('manutenzione')) {
+    product = 'Bitume modificato per manutenzione';
+    thickness = 3;
+    benefits = ['Rapida applicazione', 'Minimo disagio alla circolazione'];
+  } else {
+    product = 'GREENFLEX (CAM compliant)';
+    thickness = 4;
+    benefits = ['Conforme ai criteri CAM', 'Basso impatto ambientale con prestazioni elevate'];
+  }
+
+  const area = d.length * d.width;
+  const volume = area * (thickness / 100);
+  const asphaltTons = Math.round(volume * 2.4 * 10) / 10;
+  const bitumeTons = Math.round(asphaltTons * 0.05 * 10) / 10;
+
+  const report = `📋 <strong>REPORT PRELIMINARE &ndash; Gorima Engine</strong><br>
+📍 Località: ${d.location}<br>
+🛣️ Strada: ${d.roadType} &ndash; Traffico: ${d.traffic}<br>
+⚙️ Intervento: ${d.intervention}<br><br>
+✅ <strong>SOLUZIONE GORIMA CONSIGLIATA:</strong><br>
+&bull; Prodotto: ${product}<br>
+&bull; Spessore consigliato: ${thickness} cm<br>
+&bull; Quantità stimata:<br>
+&nbsp;&nbsp;· Conglomerato bituminoso: ${asphaltTons} tonnellate<br>
+&nbsp;&nbsp;· Bitume: ${bitumeTons} tonnellate<br><br>
+🌱 <strong>VANTAGGI:</strong><br>
+&bull; ${benefits[0]}<br>
+&bull; ${benefits[1]}<br><br>
+⚠️ <strong>Nota:</strong> Questa è una stima preliminare. Per il dimensionamento definitivo è necessario uno studio ingegneristico completo.`;
+
+  addMessage(report, false, chipMap['estimator']);
+}
+
+/* Sidebar buttons */
+document.querySelectorAll('.sidebar-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const action = btn.dataset.action;
+    if (action === 'stima') {
+      startEstimator();
+    } else if (responses[action]) {
+      addMessage(responses[action], false, chipMap[action] || chipMap['prodotto']);
+    }
+    if (window.innerWidth < 768) {
+      sidebar.classList.remove('active');
+      overlay.classList.remove('active');
+    }
+  });
+});
+
+/* Toggle sidebar */
+function openSidebar() {
+  sidebar.classList.add('active');
+  overlay.classList.add('active');
+}
+function closeSidebarFn() {
+  sidebar.classList.remove('active');
+  overlay.classList.remove('active');
+}
+
+menuBtn.addEventListener('click', openSidebar);
+closeSidebar.addEventListener('click', closeSidebarFn);
+overlay.addEventListener('click', closeSidebarFn);
+
+/* Chiudi sidebar con Escape */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSidebarFn();
+});
+
+/* Invio e click */
+sendBtn.addEventListener('click', () => handleInput(inputField.value));
+inputField.addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleInput(inputField.value);
+});
+
+/* Mic placeholder */
+document.getElementById('micBtn').addEventListener('click', () => {
+  addMessage('🎤 Funzione vocale in sviluppo. Scrivi la tua domanda.', false);
+});
+
+/* Messaggio di benvenuto */
+if (state.firstLoad) {
+  state.firstLoad = false;
+  addMessage('Ciao Michele, come posso aiutarti? Puoi chiedermi informazioni sui prodotti Gorima, sui bandi in Sicilia, o usare lo Stimatore Cantiere per un preventivo preliminare.', false, ['CAM e bandi', 'Confronto prodotti', 'Stima cantiere']);
+}
+</script>
+</body>
+</html>
