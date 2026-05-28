@@ -1,60 +1,57 @@
-import json
 import os
-import sys
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from intelligence_engine import generate_executive_response
 
+app = FastAPI(title="Gorima API Server")
 
-class APIHandler(BaseHTTPRequestHandler):
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.end_headers()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    def do_POST(self):
-        if self.path != "/api/query":
-            self.send_response(404)
-            self.end_headers()
-            return
-        try:
-            content_length = int(self.headers.get("Content-Length", 0))
-            body = self.rfile.read(content_length)
-            data = json.loads(body)
-            query = data.get("query", "").strip()
-            if not query:
-                self._send_json({"response": "Query vuota.", "status": "error"}, 400)
-                return
-            response = generate_executive_response(query)
-            self._send_json({"response": response, "status": "ok"}, 200)
-        except json.JSONDecodeError:
-            self._send_json({"response": "JSON non valido.", "status": "error"}, 400)
-        except Exception as e:
-            self._send_json({"response": f"Errore durante l'elaborazione: {str(e)}", "status": "error"}, 500)
+class QueryRequest(BaseModel):
+    query: str
 
-    def _send_json(self, data, code):
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-        self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
+class QueryResponse(BaseModel):
+    response: str
+    status: str
 
-    def log_message(self, format, *args):
-        pass
+@app.post("/api/query")
+def api_query(request: QueryRequest):
+    query = request.query.strip()
+    if not query:
+        return JSONResponse(status_code=400, content={"response": "Query vuota.", "status": "error"})
 
+    try:
+        response = generate_executive_response(query)
+        return {"response": response, "status": "ok"}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"response": f"Errore durante l'elaborazione: {str(e)}", "status": "error"})
+
+@app.get("/engine.html", response_class=HTMLResponse)
+def serve_engine():
+    try:
+        with open("engine.html", "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="engine.html not found")
+
+@app.get("/", response_class=HTMLResponse)
+def serve_root():
+    return serve_engine()
 
 if __name__ == "__main__":
+    import uvicorn
     port = int(os.environ.get("PORT", 8080))
-    server = HTTPServer(("0.0.0.0", port), APIHandler)
     print(f"🛡️  Gorima API Server avviato su http://0.0.0.0:{port}")
-    print(f"   Endpoint: POST /api/query")
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\n🛑 Server arrestato.")
-        server.server_close()
+    uvicorn.run(app, host="0.0.0.0", port=port)

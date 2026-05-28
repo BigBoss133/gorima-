@@ -32,15 +32,15 @@ Modificare `.env` con le API key necessarie. Non condividere il file `.env`.
 
 ## Utilizzo
 
-### 🖥️ Web App (consigliata per demo)
+### 🖥️ Web App (Production Ready)
 
-Interfaccia mobile-first per tecnico commerciale con risposte keyword-based e fallback LLM:
+L'engine serve nativamente sia le interfacce statiche che le API tramite FastAPI.
 
 ```bash
 ./start_engine.sh
 ```
 
-Apri `http://<IP>:8000/engine.html` nel browser.
+Apri `http://<IP>:8080/` nel browser.
 
 ### 💬 Chat CLI
 
@@ -50,8 +50,9 @@ python3 chat.py
 
 ### 🔌 API Server standalone
 
+L'API e il web server sono ora unificati:
 ```bash
-python3 api_server.py
+uvicorn api_server:app --port 8080
 # POST http://localhost:8080/api/query {"query": "..."}
 ```
 
@@ -95,7 +96,19 @@ gorima-/
 - **Mobile responsive** — sidebar collassabile su < 768px
 - **Nessuna persistenza** — ogni refresh resetta la chat
 
+
+## Docker (Consigliato per Produzione)
+
+Il progetto include `Dockerfile` e `docker-compose.yml` per un facile deploy.
+
+```bash
+docker-compose up -d --build
+```
+
+L'applicazione sarà disponibile su `http://localhost:8080`.
+
 ## Deploy su nodo remoto
+
 
 ```bash
 scp engine.html api_server.py start_engine.sh mike@mikes.local:~/gorima_engine/
