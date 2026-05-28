@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  gorima-engine:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY}
+    restart: unless-stopped

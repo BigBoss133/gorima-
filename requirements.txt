@@ -3,3 +3,6 @@ requests
 python-dotenv
 trafilatura
 playwright
+fastapi
+uvicorn
+pydantic

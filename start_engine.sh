@@ -1,5 +1,5 @@
 #!/bin/bash
-# Avvia Gorima Engine: API server + web server
+# Avvia Gorima Engine: API server (FastAPI) + static files
 cd "$(dirname "$0")"
 
 # Attiva virtualenv se esiste
@@ -10,25 +10,23 @@ fi
 # Carica variabili d'ambiente
 export $(grep -v '^#' .env | xargs) 2>/dev/null
 
-# Avvia API server in background
-python3 api_server.py &
-API_PID=$!
-echo "🛡️  API server avviato su porta 8080 (PID: $API_PID)"
+export PORT="${PORT:-8080}"
 
-# Avvia web server per engine.html in background
-python3 -m http.server 8000 --directory . &
-WEB_PID=$!
-echo "🌐 Web server avviato su porta 8000 (PID: $WEB_PID)"
+# Avvia API server in background
+uvicorn api_server:app --host 0.0.0.0 --port $PORT &
+API_PID=$!
+echo "🛡️  Gorima Engine avviato su porta $PORT (PID: $API_PID)"
 
 # Mostra URL di accesso
 LOCAL_IP=$(hostname -I | awk '{print $1}')
 echo ""
 echo "✅ Gorima Engine avviato!"
-echo "   📱 Web app: http://${LOCAL_IP}:8000/engine.html"
-echo "   🔌 API:     http://localhost:8080/api/query"
+echo "   📱 Web app (Local): http://localhost:$PORT/"
+echo "   📱 Web app (Network): http://${LOCAL_IP}:$PORT/"
+echo "   🔌 API:     http://localhost:$PORT/api/query"
 echo ""
-echo "Premi Ctrl+C per arrestare entrambi i server"
+echo "Premi Ctrl+C per arrestare il server"
 
 # Attendi Ctrl+C
-trap "kill $API_PID $WEB_PID 2>/dev/null; echo '🛑 Server arrestati.'; exit 0" INT TERM
+trap "kill $API_PID 2>/dev/null; echo '🛑 Server arrestato.'" INT TERM
 wait
